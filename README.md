@@ -1,99 +1,148 @@
-# Comandos SQL básicos para gestión de bases de datos y tablas
+# 📒 Guía rápida de SQL: Gestión de bases de datos y tablas
 
-## Crear una base de datos
+## 📚 Índice
+
+- [Crear y seleccionar base de datos](#crear-y-seleccionar-base-de-datos)
+- [Gestión de tablas](#gestión-de-tablas)
+- [Manipulación y consulta de datos](#manipulación-y-consulta-de-datos)
+- [Consultas avanzadas y relaciones](#consultas-avanzadas-y-relaciones)
+- [Administración y buenas prácticas](#administración-y-buenas-prácticas)
+- [Referencias útiles](#referencias-útiles)
+
+---
+
+## Crear y seleccionar base de datos
 
 CREATE DATABASE IF NOT EXISTS tienda CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-text
-**Explicación:** Crea la base de datos `tienda` si no existe, usando un charset moderno que soporta emojis y diferentes alfabetos.
-
-## Seleccionar una base de datos
-
 USE tienda;
 
 text
-**Explicación:** Cambia el contexto a la base que acabas de crear, para que los siguientes comandos operen ahí.
+**Crea la base `tienda` si no existe y la selecciona como contexto para operaciones posteriores.**  
+*Se recomienda `utf8mb4` para compatibilidad global y uso de emojis.*
 
-## Crear una tabla
+---
+
+## Gestión de tablas
+
+### Crear tabla
 
 CREATE TABLE productos (
 id INT AUTO_INCREMENT PRIMARY KEY,
 nombre VARCHAR(50) NOT NULL,
 precio DECIMAL(10,2) NOT NULL,
-stock INT DEFAULT 0
+stock INT DEFAULT 0,
+categoria_id INT,
+descripcion TEXT
 );
 
 text
-**Explicación:** Crea la tabla `productos` con una clave primaria, columnas básicas y restricciones para datos válidos.
+**Tabla productos:** Clave primaria, datos básicos y columna de relación.
 
-## Modificar una tabla
+### Modificar tabla
 
-ALTER TABLE productos ADD COLUMN descripcion TEXT AFTER nombre;
+ALTER TABLE productos ADD COLUMN fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP AFTER stock;
 
 text
-**Explicación:** Agrega una columna `descripcion` después de `nombre`.
+*Agrega una columna para registrar la fecha de creación del producto.*
 
-## Eliminar tabla o base de datos
+### Eliminar tabla
 
 DROP TABLE IF EXISTS productos;
-DROP DATABASE IF EXISTS tienda;
 
 text
-**Explicación:** Elimina la tabla o base de datos solo si existe, evitando errores.
+*Evita errores si la tabla ya no existe.*
 
-## Insertar datos
+---
 
-INSERT INTO productos (nombre, precio, stock) VALUES ('Laptop', 1200.50, 15);
+## Manipulación y consulta de datos
+
+### Insertar registros
+
+INSERT INTO productos (nombre, precio, stock) VALUES ('Laptop',1200.50,15);
 
 text
-**Explicación:** Inserta un registro especificando valores para cada columna.
 
-## Consultar datos
+### Consultar productos en stock y ordenados
 
 SELECT nombre, precio FROM productos WHERE stock > 0 ORDER BY precio DESC;
 
 text
-**Explicación:** Devuelve productos en stock, mostrando su nombre y precio, ordenados por precio de mayor a menor.
 
-## Actualizar registros
+### Actualizar productos
 
 UPDATE productos SET stock = stock - 1 WHERE id = 3;
 
 text
-**Explicación:** Resta una unidad al stock del producto con id 3.
 
-## Eliminar registros
+### Eliminar registros puntuales
 
 DELETE FROM productos WHERE id = 3;
 
 text
-**Explicación:** Elimina el producto cuyo id es 3. ¡Mucho cuidado al usar DELETE sin WHERE!
+**¡Precaución!** Eliminar sin WHERE borra todos los registros.
 
-## Consultas avanzadas (JOIN, agrupación, límites)
+---
+
+## Consultas avanzadas y relaciones
+
+### Join entre productos y categorías
 
 SELECT p.nombre, c.nombre AS categoria
 FROM productos p
 JOIN categorias c ON p.categoria_id = c.id;
 
 text
-**Explicación:** Une dos tablas para mostrar el nombre del producto junto con su categoría.
 
-### Otras cláusulas útiles
+### Agrupaciones y agregados
 
-- **ORDER BY:** Ordena resultados (`ORDER BY precio ASC`)
-- **GROUP BY:** Agrupa para cálculos agregados (`GROUP BY categoria_id`)
-- **HAVING:** Filtra después de agrupar
-- **LIMIT:** Limita la cantidad de resultados (`LIMIT 10`)
+SELECT categoria_id, COUNT(*) AS cantidad FROM productos GROUP BY categoria_id HAVING cantidad > 5;
+
+text
+*Consulta cuántos productos hay por categoría, solo mostrando categorías con más de 5 productos.*
+
+### Limitar resultados
+
+SELECT nombre FROM productos LIMIT 10;
+
+text
+*Solo muestra los 10 primeros productos.*
 
 ---
 
-## Buenas prácticas
+## Administración y buenas prácticas
 
-- Usa nombres descriptivos y consistentes (minúsculas, guiones bajos).
+- Usa nombres descriptivos y consistentes (minúsculas, guion bajo).
 - Aplica restricciones (`NOT NULL`, `UNIQUE`, `FOREIGN KEY`).
-- Verifica el diseño con:
+- Verifica las estructuras:
 
 DESCRIBE productos;
+SHOW TABLES;
+SHOW DATABASES;
 
 text
-undefined
+
+### Ejemplo de clave foránea
+
+ALTER TABLE productos
+ADD CONSTRAINT fk_categoria
+FOREIGN KEY (categoria_id) REFERENCES categorias(id);
+
+text
+
+### Consejos de normalización
+
+- Evita la redundancia de datos.
+- Cada columna debe contener solo un valor (atómico).
+- Usa claves primarias y foráneas para relaciones seguras.
+
+---
+
+## Referencias útiles
+
+- [w3schools SQL](https://www.w3schools.com/sql/)
+- [MySQL Reference Manual](https://dev.mysql.com/doc/)
+- [Campuslands SQL Practice](https://camper.campuslands.com/)
+
+---
+
+> **Nota:** Esta guía está orientada a principiantes y sirve como referencia rápida para operaciones comunes en bases de datos relacionales.
